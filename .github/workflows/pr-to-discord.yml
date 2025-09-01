@@ -1,0 +1,18 @@
+name: PR to Discord
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send notification to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          REPO: ${{ github.repository }}
+          TITLE: ${{ github.event.pull_request.title }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          echo "{\"content\":\"**PR opened in ${REPO}**\nTitle: ${TITLE}\nAuthor: ${AUTHOR}\nLink: ${URL}\"}" > payload.json
+          curl -s -H "Content-Type: application/json" -d @payload.json "$DISCORD_WEBHOOK_URL"
